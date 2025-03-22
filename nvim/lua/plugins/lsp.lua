@@ -152,7 +152,32 @@ return {
 		--  - settings (table): Override the default settings passed when initializing the server.
 		--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 		local servers = {
-			clangd = {},
+			clangd = {
+				cmd = {
+					"clangd",
+					"--background-index",
+					"--clang-tidy",
+					"--header-insertion=iwyu",
+					"--completion-style=detailed",
+					"--function-arg-placeholders=false",
+					"--fallback-style=llvm",
+				},
+				settings = {
+					fallbackFlags = { "-Wall", "-Werror", "-Wextra", "-Wdocumentation", "-std=c11", "-xc" },
+					clangd = {
+						arguments = {
+							"--header-insertion=never",
+							"--suggest-missing-includes",
+							"--enable-config",
+						},
+					},
+				},
+				init_options = {
+					usePlaceholders = true,
+					completeUnimported = true,
+					clangdFileStatus = true,
+				},
+			},
 			-- gopls = {},
 			-- pyright = {},
 			-- rust_analyzer = {},

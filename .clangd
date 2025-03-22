@@ -1,0 +1,28 @@
+Diagnostics:
+  ClangTidy:
+    Add: [
+      modernize*,
+      readability*,
+      bugprone*,
+      misc*,
+      google*,
+      performance*,
+      clang-analyzer*,
+    ]
+    Remove: [
+      "google-readability-braces-around-statements",
+      "readability-braces-around-statements",
+      "readability-identifier-length",
+      "cppcoreguidelines-*",
+      "fuchsia-*",
+      "llvm-header-guard",
+      "llvmlibc-*"
+    ]
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+
+Hover:
+  ShowAKA: true

@@ -11,8 +11,8 @@ end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+	require("plugins.nvim-lint"),
 	require("plugins.neotree"),
-	require("plugins.colortheme"),
 	require("plugins.bufferline"),
 	require("plugins.lualine"),
 	require("plugins.treesitter"),
@@ -22,9 +22,12 @@ require("lazy").setup({
 	require("plugins.autoformatting"),
 	require("plugins.ft_nvim"),
 	require("plugins.gitsigns"),
-	-- require("plugins.indent-blankline"), Please,fix this!! //TODO
+	require("plugins.mini-identscope"),
 	require("plugins.misc"),
 	require("plugins.cheatsheet"),
+	require("plugins.dap"),
+	require("plugins.norminette"),
+	require("plugins.colortheme"),
 	-- require("plugins.lazygit"), one day, if I install LazyGit
 })
 

@@ -9,10 +9,15 @@ vim.keymap.set({ "n", "v" }, "<Space>", "<Nop>", { silent = true })
 local opts = { noremap = true, silent = true }
 
 -- save file
-vim.keymap.set("n", "<C-s>", "<cmd> w <CR>", opts)
+vim.keymap.set("n", "<C-a>", "<cmd> w <CR>", opts)
 
 -- save file without auto-formatting
-vim.keymap.set("n", "<leader>sn", "<cmd>noautocmd w <CR>", opts)
+vim.keymap.set(
+	"n",
+	"<leader>sn",
+	"<cmd>noautocmd w <CR>",
+	vim.tbl_extend("force", opts, { desc = "[S]ave file with [n]o formatting" })
+)
 
 -- quit file
 vim.keymap.set("n", "<C-q>", "<cmd> q <CR>", opts)
@@ -37,13 +42,18 @@ vim.keymap.set("n", "<Right>", ":vertical resize +2<CR>", opts)
 -- Buffers
 vim.keymap.set("n", "<Tab>", ":bnext<CR>", opts)
 vim.keymap.set("n", "<S-Tab>", ":bprevious<CR>", opts)
-vim.keymap.set("n", "<leader>x", ":bdelete!<CR>", opts) -- close buffer
-vim.keymap.set("n", "<leader>b", "<cmd> enew <CR>", opts) -- new buffer
+vim.keymap.set("n", "<leader>x", ":bdelete!<CR>", vim.tbl_extend("force", opts, { desc = "Close buffer" })) -- close buffer
+vim.keymap.set("n", "<leader>b", "<cmd> enew <CR>", vim.tbl_extend("force", opts, { desc = "New [B]uffer" })) -- new buffer
 
 -- Window management
-vim.keymap.set("n", "<leader>v", "<C-w>v", opts) -- split window vertically
-vim.keymap.set("n", "<leader>h", "<C-w>s", opts) -- split window horizontally
-vim.keymap.set("n", "<leader>se", "<C-w>=", opts) -- make split windows equal width & height
+vim.keymap.set("n", "<leader>v", "<C-w>v", vim.tbl_extend("force", opts, { desc = "Split window [V]ertically" })) -- split window vertically
+vim.keymap.set("n", "<leader>h", "<C-w>s", vim.tbl_extend("force", opts, { desc = "Split window [H]orizontally" })) -- split window horizontally
+vim.keymap.set(
+	"n",
+	"<leader>se",
+	"<C-w>=",
+	vim.tbl_extend("force", opts, { desc = "Make [S]plit window [E]qual width & heigth" })
+) -- make split windows equal width & height
 vim.keymap.set("n", "<leader>xs", ":close<CR>", opts) -- close current split window
 
 -- Navigate between splits
@@ -69,12 +79,27 @@ vim.keymap.set("v", ">", ">gv", opts)
 vim.keymap.set("v", "p", '"_dP', opts)
 
 -- Diagnostic keymaps
-vim.keymap.set("n", "[d", vim.diagnostic.get_prev, { desc = "Go to previous diagnostic message" })
-vim.keymap.set("n", "]d", vim.diagnostic.get_next, { desc = "Go to next diagnostic message" })
+-- vim.keymap.set("n", "[d", vim.diagnostic.get_prev, { desc = "Go to previous diagnostic message" })
+-- vim.keymap.set("n", "]d", vim.diagnostic.get_next, { desc = "Go to next diagnostic message" })
 vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
 
 -- FtHeader
 vim.keymap.set("n", "<F2>", ":FtHeader<CR>", opts)
 
+--Cheatsheet
 vim.keymap.set("n", "<F3>", ":Cheatsheet<CR>", opts)
+
+-- Norminette Toggle
+local norminette_enabled = false
+
+local function toggle_norminette()
+	if norminette_enabled then
+		vim.cmd("NorminetteDisable")
+	else
+		vim.cmd("NorminetteEnable")
+	end
+	norminette_enabled = not norminette_enabled
+end
+
+vim.keymap.set("n", "<F4>", toggle_norminette, vim.tbl_extend("force", opts, { desc = "Toggle Norminette" }))

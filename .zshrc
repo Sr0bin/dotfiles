@@ -106,3 +106,7 @@ source $ZSH/oh-my-zsh.sh
 alias francinette=/home/rorollin/francinette/tester.sh
 
 alias paco=/home/rorollin/francinette/tester.sh
+
+alias maked="/home/rorollin/.local/bin/compiledb make"
+
+alias compc="cc -Wall -Werror -Wextra"

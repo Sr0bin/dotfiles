@@ -27,13 +27,34 @@ return {
 		},
 	},
 	config = function()
-		-- If you want icons for diagnostic errors, you'll need to define them somewhere:
-		vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
-		vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
-		vim.fn.sign_define("DiagnosticSignInfo", { text = " ", texthl = "DiagnosticSignInfo" })
-		vim.fn.sign_define("DiagnosticSignHint", { text = "󰌵", texthl = "DiagnosticSignHint" })
+		vim.diagnostic.config({
+			severity_sort = true,
+			float = { border = "rounded", source = "if_many" },
+			underline = { severity = vim.diagnostic.severity.ERROR },
+			signs = vim.g.have_nerd_font and {
+				text = {
+					[vim.diagnostic.severity.ERROR] = "󰅚 ",
+					[vim.diagnostic.severity.WARN] = "󰀪 ",
+					[vim.diagnostic.severity.INFO] = "󰋽 ",
+					[vim.diagnostic.severity.HINT] = "󰌶 ",
+				},
+			} or {},
+			virtual_text = {
+				source = "if_many",
+				spacing = 2,
+				format = function(diagnostic)
+					local diagnostic_message = {
+						[vim.diagnostic.severity.ERROR] = diagnostic.message,
+						[vim.diagnostic.severity.WARN] = diagnostic.message,
+						[vim.diagnostic.severity.INFO] = diagnostic.message,
+						[vim.diagnostic.severity.HINT] = diagnostic.message,
+					}
+					return diagnostic_message[diagnostic.severity]
+				end,
+			},
+		})
 		require("neo-tree").setup({
-			close_if_last_window = false, -- Close Neo-tree if it is the last window left in the tab
+			close_if_last_window = true, -- Close Neo-tree if it is the last window left in the tab
 			popup_border_style = "rounded",
 			enable_git_status = true,
 			enable_diagnostics = true,
@@ -189,7 +210,7 @@ return {
 				filtered_items = {
 					visible = false, -- when true, they will just be displayed differently than normal items
 					hide_dotfiles = false,
-					hide_gitignored = false,
+					hide_gitignored = true,
 					hide_hidden = false, -- only works on Windows for hidden files/directories
 					hide_by_name = {
 						".DS_Store",
@@ -217,7 +238,7 @@ return {
 					},
 				},
 				follow_current_file = {
-					enabled = false, -- This will find and focus the file in the active buffer every time
+					enabled = true, -- This will find and focus the file in the active buffer every time
 					--               -- the current file is changed while the tree is open.
 					leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
 				},
@@ -304,6 +325,10 @@ return {
 						["ot"] = { "order_by_type", nowait = false },
 					},
 				},
+			},
+			source_selector = {
+				winbar = true,
+				statusline = true,
 			},
 		})
 
