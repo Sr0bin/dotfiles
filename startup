@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Configuration - Change this single variable when switching projects
+PROJECT_DIR="$HOME/Projects/M2/push_swap"
+
+# Create two separate tmux sessions
+tmux new-session -d -s utilities # Session for utility applications
+tmux new-session -d -s general   # Session for development work
+
+# Set up the 'utilities' session with three applications
+# First pane runs blue42 (possibly a custom script)
+tmux send-keys -t utilities './blue42' C-m
+# Create a horizontal split and run discord
+tmux split-window -t utilities -h
+tmux send-keys -t utilities 'discord' C-m
+# Create another split and run brave browser
+tmux split-window -t utilities
+tmux send-keys -t utilities 'brave-browser' C-m
+
+# Set up the 'general' session for development
+# Window 0: Code editing
+tmux send-keys -t general:0 "cd $PROJECT_DIR" C-m
+tmux send-keys -t general:0 'nvim -c "Neotree"' C-m
+
+# Window 1: Debugging environment
+tmux new-window -t general:1 -c "$PROJECT_DIR"
+tmux send-keys -t general:1 'gdb' C-m
+tmux split-window -t general:1 -c "$PROJECT_DIR" -h
+tmux send-keys -t general:1 'tty' C-m
+
+# Window 2: Additional tools (valgrind)
+tmux new-window -t general:2 -c "$PROJECT_DIR"
+tmux split-window -t general:2 -c "$PROJECT_DIR" -h
+tmux send-keys -t general:2 'valgrind-listener' C-m
+
+# Finally, attach to the utilities session
+tmux attach -t utilities
