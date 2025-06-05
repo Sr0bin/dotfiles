@@ -91,7 +91,7 @@ vim.keymap.set("n", "<F2>", ":FtHeader<CR>", opts)
 vim.keymap.set("n", "<F3>", ":Cheatsheet<CR>", opts)
 
 -- Norminette Toggle
-local norminette_enabled = false
+local norminette_enabled = true
 
 local function toggle_norminette()
 	if norminette_enabled then
@@ -103,3 +103,11 @@ local function toggle_norminette()
 end
 
 vim.keymap.set("n", "<F4>", toggle_norminette, vim.tbl_extend("force", opts, { desc = "Toggle Norminette" }))
+-- Signature
+vim.keymap.set({ "n" }, "<F5>", function()
+	require("lsp_signature").toggle_float_win()
+end, { silent = true, noremap = true, desc = "toggle signature" })
+
+vim.keymap.set({ "n" }, "<Leader>k", function()
+	vim.lsp.buf.signature_help()
+end, { silent = true, noremap = true, desc = "toggle signature" })

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration - Change this single variable when switching projects
-PROJECT_DIR="$HOME/Projects/M2/push_swap"
+PROJECT_DIR="$HOME/Projects/M3/minishell"
 
 # Create two separate tmux sessions
 tmux new-session -d -s utilities # Session for utility applications
