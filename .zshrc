@@ -107,6 +107,9 @@ alias francinette=/home/rorollin/francinette/tester.sh
 
 alias paco=/home/rorollin/francinette/tester.sh
 
-alias maked="/home/rorollin/.local/bin/compiledb make"
+alias maked="compiledb make"
 
 alias compc="cc -Wall -Werror -Wextra"
+eval "$(/home/rorollin/linuxbrew/.linuxbrew/bin/brew shellenv)"
+alias philotest="~/42PhilosophersHelper/test.sh"
+export PATH="$HOME/.local/bin:$PATH"
