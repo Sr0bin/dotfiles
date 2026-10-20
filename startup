@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration - Change this single variable when switching projects
-PROJECT_DIR="$HOME/Projects/M4/cpp/cpp03"
+PROJECT_DIR="$HOME/Projects/M5/cpp/cpp05/"
 
 # Create two separate tmux sessions
 tmux new-session -d -s utilities # Session for utility applications
@@ -16,7 +16,7 @@ tmux split-window -t utilities -h
 tmux send-keys -t utilities 'discord' C-m
 # Create another split and run brave browser
 tmux split-window -t utilities
-tmux send-keys -t utilities 'brave-browser' C-m
+tmux send-keys -t utilities 'brave' C-m
 
 #Launch claude in its session
 tmux send-keys -t claude "cd $PROJECT_DIR" C-m
