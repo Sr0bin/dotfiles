@@ -1,7 +1,7 @@
 #!/bin/bash
 # tlayout DIR [SESSION] -- (re)build SESSION (default: general) for DIR, with a layout picked
 # from the project type:
-#   web (package.json)  0: nvim   1: lazygit | dev server   2: shell | lazydocker
+#   web (package.json)  0: nvim   1: lazygit | dev server (typed, not run)   2: shell | lazydocker
 #   C/C++ (otherwise)   0: nvim   1: gdb | lazygit          2: shell | valgrind-listener
 # Existing windows of 'general' are killed: quit unsaved apps first (tproj does).
 
@@ -30,9 +30,10 @@ else
 	first=$(tmux display -p -t "$sess" '#{window_id}')
 fi
 
-# split W CMD_LEFT CMD_RIGHT: left/right panes in window W (empty CMD = plain shell)
+# split W CMD_LEFT CMD_RIGHT: left/right panes in window W (empty CMD = plain shell).
+# The right pane's id is left in $right for the caller.
 split() {
-	local left right
+	local left
 	left=$(tmux display -p -t "$1" '#{pane_id}')
 	right=$(tmux split-window -d -h -P -F '#{pane_id}' -t "$1" -c "$dir")
 	[ -n "$2" ] && tmux send-keys -t "$left" "$2" Enter
@@ -45,7 +46,9 @@ w2=$(tmux new-window -d -P -F '#{window_id}' -t "$sess" -c "$dir")
 
 case "$kind" in
 	web)
-		split "$w1" lazygit "$dev_cmd"
+		split "$w1" lazygit ''
+		# typed, not run: switching projects must not start containers; press Enter when needed
+		tmux send-keys -t "$right" "$dev_cmd"
 		split "$w2" '' lazydocker
 		;;
 	cpp)
