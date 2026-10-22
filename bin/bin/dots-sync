@@ -1,0 +1,31 @@
+#!/bin/bash
+# dots-sync -- commit and push ~/dotfiles when something changed.
+# Run daily by dots-sync.timer; safe to run by hand.
+# The repo is PUBLIC: anything that looks like a secret blocks the sync.
+
+set -uo pipefail
+cd "$HOME/dotfiles" || exit 1
+
+fail() {
+	notify-send -u critical "dots-sync" "$1" 2>/dev/null
+	echo "dots-sync: $1" >&2
+	exit 1
+}
+
+git add -A
+if ! git diff --cached --quiet; then
+	# scan added lines only; this script itself contains the patterns, so skip it
+	if git diff --cached -U0 -- . ':!bin/bin/dots-sync' | grep '^+' |
+		grep -qiE '(token|secret|api[_-]?key|passw(or)?d)[[:space:]]*[=:]|PRIVATE KEY|ghp_|github_pat_|sk-ant-|AKIA[0-9A-Z]{16}'; then
+		git reset -q
+		fail "possible secret in the diff, nothing committed. Check: git -C ~/dotfiles diff"
+	fi
+	git commit -q -m "auto-sync $(date +%F)" || fail "commit failed"
+fi
+
+# another machine may have pushed: replay our commits on top of it
+git pull -q --rebase origin main || {
+	git rebase --abort 2>/dev/null
+	fail "pull --rebase conflicted, resolve by hand in ~/dotfiles"
+}
+git push -q origin HEAD || fail "push failed"

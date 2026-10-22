@@ -1,0 +1,6 @@
+[Unit]
+Description=Commit and push ~/dotfiles if it changed
+
+[Service]
+Type=oneshot
+ExecStart=%h/bin/dots-sync
