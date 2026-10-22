@@ -54,7 +54,7 @@ vim.keymap.set(
 	"<C-w>=",
 	vim.tbl_extend("force", opts, { desc = "Make [S]plit window [E]qual width & heigth" })
 ) -- make split windows equal width & height
-vim.keymap.set("n", "<leader>xs", ":close<CR>", opts) -- close current split window
+-- close current split window: native <C-w>c (a <leader>xs map made <leader>x wait for timeoutlen)
 
 -- Navigate between splits
 vim.keymap.set("n", "<C-k>", ":wincmd k<CR>", opts)
@@ -79,8 +79,13 @@ vim.keymap.set("v", ">", ">gv", opts)
 vim.keymap.set("v", "p", '"_dP', opts)
 
 -- Diagnostic keymaps
--- vim.keymap.set("n", "[d", vim.diagnostic.get_prev, { desc = "Go to previous diagnostic message" })
--- vim.keymap.set("n", "]d", vim.diagnostic.get_next, { desc = "Go to next diagnostic message" })
+-- get_prev/get_next only *return* a diagnostic; jump() moves to it (float = show its message)
+vim.keymap.set("n", "[d", function()
+	vim.diagnostic.jump({ count = -1, float = true })
+end, { desc = "Go to previous diagnostic message" })
+vim.keymap.set("n", "]d", function()
+	vim.diagnostic.jump({ count = 1, float = true })
+end, { desc = "Go to next diagnostic message" })
 vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
 
@@ -103,11 +108,7 @@ local function toggle_norminette()
 end
 
 vim.keymap.set("n", "<F4>", toggle_norminette, vim.tbl_extend("force", opts, { desc = "Toggle Norminette" }))
--- Signature
-vim.keymap.set({ "n" }, "<F5>", function()
-	require("lsp_signature").toggle_float_win()
-end, { silent = true, noremap = true, desc = "toggle signature" })
-
+-- Signature (<F5> lsp_signature toggle removed: plugin is disabled in init.lua)
 vim.keymap.set({ "n" }, "<Leader>k", function()
 	vim.lsp.buf.signature_help()
 end, { silent = true, noremap = true, desc = "toggle signature" })

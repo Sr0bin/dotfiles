@@ -61,16 +61,18 @@ return {
 					sorter = require("telescope.sorters").get_fuzzy_file(),
 					debounce = 100, -- Try adjusting this value
 				},
+				-- file_ignore_patterns are Lua patterns: `.` matches any char, so escape it as `%.`
+				-- and anchor on `/` to ignore the directory only (not .github/ or .gitignore)
 				find_files = {
-					file_ignore_patterns = { "node_modules", ".git", ".venv" },
+					file_ignore_patterns = { "node_modules/", "%.git/", "%.venv/" },
 					hidden = true,
 				},
-			},
-			live_grep = {
-				file_ignore_patterns = { "node_modules", ".git", ".venv" },
-				additional_args = function(_)
-					return { "--hidden" }
-				end,
+				live_grep = {
+					file_ignore_patterns = { "node_modules/", "%.git/", "%.venv/" },
+					additional_args = function(_)
+						return { "--hidden" }
+					end,
+				},
 			},
 			extensions = {
 				["ui-select"] = {

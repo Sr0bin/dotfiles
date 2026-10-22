@@ -1,0 +1,58 @@
+#!/bin/bash
+# tlayout DIR [SESSION] -- (re)build SESSION (default: general) for DIR, with a layout picked
+# from the project type:
+#   web (package.json)  0: nvim   1: lazygit | dev server   2: shell | lazydocker
+#   C/C++ (otherwise)   0: nvim   1: gdb | lazygit          2: shell | valgrind-listener
+# Existing windows of 'general' are killed: quit unsaved apps first (tproj does).
+
+dir=$(cd "${1:-.}" && pwd) || exit 1
+sess=${2:-general}
+
+if [ -f "$dir/package.json" ]; then
+	kind=web
+	# prefer the project's own entry point when it has one
+	if grep -q '^dev:' "$dir/Makefile" 2>/dev/null; then
+		dev_cmd='make dev'
+	else
+		dev_cmd='npm run dev'
+	fi
+else
+	kind=cpp
+fi
+
+# Start from one fresh window, then drop every older one.
+if tmux has-session -t "$sess" 2>/dev/null; then
+	first=$(tmux new-window -d -P -F '#{window_id}' -t "$sess" -c "$dir")
+	tmux kill-window -a -t "$first"
+	tmux move-window -r -t "$sess" # renumber from base-index
+else
+	tmux new-session -d -s "$sess" -c "$dir"
+	first=$(tmux display -p -t "$sess" '#{window_id}')
+fi
+
+# split W CMD_LEFT CMD_RIGHT: left/right panes in window W (empty CMD = plain shell)
+split() {
+	local left right
+	left=$(tmux display -p -t "$1" '#{pane_id}')
+	right=$(tmux split-window -d -h -P -F '#{pane_id}' -t "$1" -c "$dir")
+	[ -n "$2" ] && tmux send-keys -t "$left" "$2" Enter
+	[ -n "$3" ] && tmux send-keys -t "$right" "$3" Enter
+}
+
+tmux send-keys -t "$first" 'nvim -c "Neotree"' Enter
+w1=$(tmux new-window -d -P -F '#{window_id}' -t "$sess" -c "$dir")
+w2=$(tmux new-window -d -P -F '#{window_id}' -t "$sess" -c "$dir")
+
+case "$kind" in
+	web)
+		split "$w1" lazygit "$dev_cmd"
+		split "$w2" '' lazydocker
+		;;
+	cpp)
+		split "$w1" gdb lazygit
+		split "$w2" '' valgrind-listener
+		;;
+esac
+
+tmux select-window -t "$first"
+tmux display-message "tlayout: $kind layout in ${dir/#$HOME/\~}"

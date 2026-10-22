@@ -1,0 +1,5 @@
+# .tpp = template implementation files: tell clang they're C++ (it doesn't know the extension)
+If:
+  PathMatch: .*\.tpp
+CompileFlags:
+  Add: [-xc++]

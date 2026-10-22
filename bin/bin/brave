@@ -1,0 +1,2 @@
+#!/bin/bash
+exec ~/brave/opt/brave.com/brave/brave "$@"

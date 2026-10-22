@@ -1,0 +1,16 @@
+[user]
+	email = 10898753+Sr0bin@users.noreply.github.com
+[credential "https://github.com"]
+	helper = 
+	helper = !/home/rorollin/linuxbrew/.linuxbrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/home/rorollin/linuxbrew/.linuxbrew/bin/gh auth git-credential
+[core]
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+[merge]
+	conflictStyle = zdiff3

@@ -1,0 +1,86 @@
+#!/bin/bash
+# tproj [DIR] -- move the general/claude sessions to another project:
+# apps are quit cleanly; claude panes are relaunched in DIR, general is rebuilt
+# by tlayout with the layout matching DIR's project type (web or C/C++).
+# No arg: pick from a tmux menu of ~/Projects.
+
+if [ -z "$1" ]; then
+	menu=()
+	while read -r d; do
+		menu+=("${d#$HOME/Projects/}" "" "run-shell '$0 \"$d\"'")
+	done < <(find "$HOME/Projects" -mindepth 2 -maxdepth 4 \( -name Makefile -o -name .git \) -printf '%h\n' | sort -u |
+		awk '!p || index($0, p"/") != 1 {print; p=$0}')
+	tmux display-menu -T " project " "${menu[@]}"
+	exit
+fi
+
+dir=$(cd "$1" && pwd) || exit 1
+
+# pids of our own process chain, so we never kill the pane we are running in
+mine=" "
+pid=$$
+while [ "${pid:-0}" -gt 1 ]; do
+	mine="$mine$pid "
+	pid=$(ps -o ppid= -p "$pid" | tr -d ' ')
+done
+
+stuck=()
+while read -r sess pane cmd panepid; do
+	case "$sess" in general | claude) ;; *) continue ;; esac
+	case "$mine" in *" $panepid "*) continue ;; esac
+
+	case "$cmd" in
+		bash | zsh | sh | fish) relaunch= ;;
+		nvim)
+			tmux send-keys -t "$pane" Escape ':qa' Enter
+			relaunch='nvim -c "Neotree"'
+			;;
+		gdb)
+			tmux send-keys -t "$pane" 'quit' Enter
+			relaunch='gdb'
+			;;
+		lazygit)
+			tmux send-keys -t "$pane" 'q'
+			relaunch='lazygit'
+			;;
+		claude)
+			tmux send-keys -t "$pane" '/exit' Enter
+			relaunch='claude'
+			;;
+		*)
+			tmux send-keys -t "$pane" C-c
+			relaunch="$cmd"
+			;;
+	esac
+
+	if [ -n "$relaunch" ]; then
+		# wait for the app to actually give the shell back (nvim refuses on unsaved buffers)
+		for _ in $(seq 30); do
+			case "$(tmux display -p -t "$pane" '#{pane_current_command}')" in
+				bash | zsh | sh | fish) break ;;
+			esac
+			sleep 0.1
+		done
+		case "$(tmux display -p -t "$pane" '#{pane_current_command}')" in
+			bash | zsh | sh | fish) ;;
+			*)
+				stuck+=("$sess:$cmd")
+				continue
+				;;
+		esac
+	fi
+	# general is rebuilt from scratch by tlayout below (its layout depends on the project type)
+	[ "$sess" = general ] && continue
+	tmux send-keys -t "$pane" "cd '$dir' && clear${relaunch:+ && $relaunch}" Enter
+	tmux clear-history -t "$pane"
+done < <(tmux list-panes -a -F '#{session_name} #{pane_id} #{pane_current_command} #{pane_pid}')
+
+[ ${#stuck[@]} -gt 0 ] && tmux display-message "tproj: left alone (won't quit): ${stuck[*]}"
+
+# Rebuilding kills general's windows: never do it while an app there still holds unsaved work.
+case " ${stuck[*]}" in
+	*" general:"*) ;;
+	# -b: run from the tmux server, so it survives if this script's own pane gets killed
+	*) tmux run-shell -b "$HOME/bin/tlayout '$dir'" ;;
+esac
+exit 0

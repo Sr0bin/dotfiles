@@ -1,0 +1,5 @@
+# delta renders lazygit's diff panel (syntax highlight + word-level changes)
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never

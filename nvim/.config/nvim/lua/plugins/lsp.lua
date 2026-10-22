@@ -100,7 +100,7 @@ return {
 				--
 				-- When you move your cursor, the highlights will be cleared (the second autocommand).
 				local client = vim.lsp.get_client_by_id(event.data.client_id)
-				if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+				if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
 					local highlight_augroup = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
 					vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 						buffer = event.buf,
@@ -127,7 +127,7 @@ return {
 				-- code, if the language server you are using supports them
 				--
 				-- This may be unwanted, since they displace some of your code
-				if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+				if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
 					map("<leader>th", function()
 						vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
 					end, "[T]oggle Inlay [H]ints")
@@ -162,19 +162,9 @@ return {
 					"--function-arg-placeholders=false",
 					"--fallback-style=llvm",
 				},
-				settings = {
-					fallbackFlags = { "-Wall", "-Werror", "-Wextra", "-Wdocumentation", "-std=c11", "-xc" },
-					clangd = {
-						arguments = {
-							"--header-insertion=never",
-							"--suggest-missing-includes",
-							"--enable-config",
-						},
-					},
-				},
+				-- clangd only reads command-line flags (cmd above), ~/.config/clangd/config.yaml,
+				-- and a few init_options. Per-project flags come from compile_commands.json (compiledb).
 				init_options = {
-					usePlaceholders = true,
-					completeUnimported = true,
 					clangdFileStatus = true,
 				},
 			},
@@ -188,6 +178,10 @@ return {
 			--
 			-- But for many setups, the LSP (`tsserver`) will work just fine
 			ts_ls = {}, -- tsserver is deprecated
+			svelte = {},
+			eslint = {}, -- reads the project's eslint.config.* (needs `npm ci`)
+			prismals = {},
+			docker_compose_language_service = {}, -- needs the yaml.docker-compose filetype, see below
 			ruff = {},
 			pylsp = {
 				settings = {
@@ -256,17 +250,24 @@ return {
 		})
 		require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
-		require("mason-lspconfig").setup({
-			handlers = {
-				function(server_name)
-					local server = servers[server_name] or {}
-					-- This handles overriding only values explicitly passed
-					-- by the server configuration above. Useful when disabling
-					-- certain features of an LSP (for example, turning off formatting for tsserver)
-					server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-					require("lspconfig")[server_name].setup(server)
-				end,
+		-- mason-lspconfig v2 removed `handlers`: servers are now configured with the
+		-- native nvim 0.11 API (vim.lsp.config), which merges on top of nvim-lspconfig's
+		-- defaults, then mason-lspconfig calls vim.lsp.enable() on every installed server.
+		vim.lsp.config("*", { capabilities = capabilities })
+		for server_name, server in pairs(servers) do
+			vim.lsp.config(server_name, server)
+		end
+
+		-- nvim detects compose files as plain yaml; the compose LSP only attaches to this filetype
+		vim.filetype.add({
+			filename = {
+				["docker-compose.yml"] = "yaml.docker-compose",
+				["docker-compose.yaml"] = "yaml.docker-compose",
+				["compose.yml"] = "yaml.docker-compose",
+				["compose.yaml"] = "yaml.docker-compose",
 			},
 		})
+
+		require("mason-lspconfig").setup() -- automatic_enable = true by default
 	end,
 }

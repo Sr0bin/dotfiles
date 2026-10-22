@@ -2,6 +2,12 @@
 return {
 	"lewis6991/gitsigns.nvim",
 	opts = {
+		current_line_blame = true,
+		on_attach = function(bufnr)
+			vim.keymap.set("n", "<leader>gb", function()
+				require("gitsigns").blame_line({ full = true })
+			end, { buffer = bufnr, desc = "Git blame line" })
+		end,
 		signs = {
 			add = { text = "+" },
 			change = { text = "~" },
