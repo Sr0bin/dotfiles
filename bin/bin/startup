@@ -3,8 +3,10 @@
 # Configuration - Change this single variable when switching projects
 PROJECT_DIR="$HOME/Projects/ft_transcendence/"
 
-# Create the sessions ('general' is created by tlayout below)
+# Create the sessions, in this order: utilities $0, general $1, claude $2
 tmux new-session -d -s utilities # Session for utility applications
+# 'general' (development): web or C/C++ layout, picked from the project type (see ~/bin/tlayout)
+"$HOME/bin/tlayout" "$PROJECT_DIR"
 tmux new-session -d -s claude    # Session for claude
 
 # Set up the 'utilities' session with three applications
@@ -20,10 +22,6 @@ tmux send-keys -t utilities 'brave' C-m
 #Launch claude in its session
 tmux send-keys -t claude "cd $PROJECT_DIR" C-m
 tmux send-keys -t claude 'claude' C-m
-
-# Set up the 'general' session for development: web or C/C++ layout,
-# picked from the project type (see ~/bin/tlayout)
-"$HOME/bin/tlayout" "$PROJECT_DIR"
 
 # Finally, attach to the general session
 tmux attach -t general
