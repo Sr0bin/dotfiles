@@ -22,9 +22,10 @@ step "Homebrew in $BREW_PREFIX"
 eval "$("$BREW_PREFIX/bin/brew" shellenv)"
 
 step "CLI tools"
-pkgs=(neovim lazygit lazydocker fzf git-delta gh tree-sitter-cli compiledb)
+# tmux always from brew: .tmux.conf needs >= 3.3 (allow-passthrough), distros ship older
+pkgs=(neovim tmux lazygit lazydocker fzf git-delta gh tree-sitter-cli compiledb)
 # system versions are fine when present (command:formula)
-for pair in tmux:tmux stow:stow rg:ripgrep; do
+for pair in stow:stow rg:ripgrep; do
 	have "${pair%%:*}" || pkgs+=("${pair#*:}")
 done
 brew install --quiet "${pkgs[@]}"
