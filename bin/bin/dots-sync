@@ -23,9 +23,9 @@ if ! git diff --cached --quiet; then
 	git commit -q -m "auto-sync $(date +%F)" || fail "commit failed"
 fi
 
-# another machine may have pushed: replay our commits on top of it
-git pull -q --rebase origin main || {
-	git rebase --abort 2>/dev/null
-	fail "pull --rebase conflicted, resolve by hand in ~/dotfiles"
+# another machine may have pushed: merge it in (a rebase would flatten earlier merges)
+git pull -q --no-rebase --no-edit origin main || {
+	git merge --abort 2>/dev/null
+	fail "pull conflicted, resolve by hand in ~/dotfiles"
 }
 git push -q origin HEAD || fail "push failed"
