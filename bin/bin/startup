@@ -2,6 +2,8 @@
 
 # Configuration - Change this single variable when switching projects
 PROJECT_DIR="$HOME/Projects/ft_transcendence/"
+# missing on this machine: open home instead of failing (tlayout needs an existing dir)
+[ -d "$PROJECT_DIR" ] || PROJECT_DIR=$HOME
 
 # Create the sessions, in this order: utilities $0, general $1, claude $2
 tmux new-session -d -s utilities # Session for utility applications
@@ -11,7 +13,7 @@ tmux new-session -d -s claude    # Session for claude
 
 # Set up the 'utilities' session with three applications
 # First pane runs blue42 (possibly a custom script)
-tmux send-keys -t utilities './blue42' C-m
+[ -x ./blue42 ] && tmux send-keys -t utilities './blue42' C-m # not on every machine
 # Create a horizontal split and run discord
 tmux split-window -t utilities -h
 tmux send-keys -t utilities 'discord' C-m

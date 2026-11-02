@@ -100,14 +100,15 @@ export VISUAL='nvim'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias francinette=/home/rorollin/francinette/tester.sh
+alias francinette="$HOME/francinette/tester.sh"
 
-alias paco=/home/rorollin/francinette/tester.sh
+alias paco="$HOME/francinette/tester.sh"
 
 alias maked="compiledb make"
 
 alias compc="cc -Wall -Werror -Wextra"
-eval "$(/home/rorollin/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# brew only exists on the no-root machine (install.sh); install-ubuntu.sh uses apt
+[ -x "$HOME/linuxbrew/.linuxbrew/bin/brew" ] && eval "$("$HOME/linuxbrew/.linuxbrew/bin/brew" shellenv)"
 alias philotest="~/42PhilosophersHelper/test.sh"
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -117,3 +118,10 @@ export NVM_DIR="$HOME/.nvm"
 
 # fzf: Ctrl-R fuzzy history, Ctrl-T fuzzy file picker, Alt-C fuzzy cd
 command -v fzf >/dev/null && source <(fzf --zsh)
+
+# bun completions
+[ -s "/home/robin-rollin/.bun/_bun" ] && source "/home/robin-rollin/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

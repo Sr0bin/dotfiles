@@ -1,2 +1,7 @@
 #!/bin/bash
-exec ~/brave/opt/brave.com/brave/brave "$@"
+# brave: the home-dir install on the no-root machine, the apt package elsewhere
+for b in ~/brave/opt/brave.com/brave/brave brave-browser; do
+	command -v "$b" >/dev/null && exec "$b" "$@"
+done
+echo "brave: not installed" >&2
+exit 127

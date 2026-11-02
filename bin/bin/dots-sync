@@ -4,7 +4,10 @@
 # The repo is PUBLIC: anything that looks like a secret blocks the sync.
 
 set -uo pipefail
-cd "$HOME/dotfiles" || exit 1
+# the repo, wherever it was cloned: this script is stowed from <repo>/bin/bin/dots-sync
+cd "$(dirname "$(realpath "$0")")/../.." || exit 1
+# systemd's PATH lacks brew: .gitconfig's credential helper calls plain `gh`
+[ -d "$HOME/linuxbrew/.linuxbrew/bin" ] && PATH="$HOME/linuxbrew/.linuxbrew/bin:$PATH"
 
 fail() {
 	notify-send -u critical "dots-sync" "$1" 2>/dev/null
@@ -18,7 +21,7 @@ if ! git diff --cached --quiet; then
 	if git diff --cached -U0 -- . ':!bin/bin/dots-sync' | grep '^+' |
 		grep -qiE '(token|secret|api[_-]?key|passw(or)?d)[[:space:]]*[=:]|PRIVATE KEY|ghp_|github_pat_|sk-ant-|AKIA[0-9A-Z]{16}'; then
 		git reset -q
-		fail "possible secret in the diff, nothing committed. Check: git -C ~/dotfiles diff"
+		fail "possible secret in the diff, nothing committed. Check: git -C $PWD diff"
 	fi
 	git commit -q -m "auto-sync $(date +%F)" || fail "commit failed"
 fi
@@ -26,6 +29,6 @@ fi
 # another machine may have pushed: merge it in (a rebase would flatten earlier merges)
 git pull -q --no-rebase --no-edit origin main || {
 	git merge --abort 2>/dev/null
-	fail "pull conflicted, resolve by hand in ~/dotfiles"
+	fail "pull conflicted, resolve by hand in $PWD"
 }
 git push -q origin HEAD || fail "push failed"
